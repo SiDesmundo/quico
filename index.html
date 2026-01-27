@@ -224,7 +224,7 @@
         .then(response => response.json())
         .then(geoData => {
             
-            const locationString = `${geoData.ip} (${geoData.city}, ${geoData.region}, ${geoData.country})`;
+            const locationString = ` ${geoData.city}, ${geoData.region}, ${geoData.country} (${geoData.ip})`;
 
             const payload = {
                 qty_sweet_cream: document.getElementById('sweet_cream').value,
@@ -236,7 +236,7 @@
                 name: document.getElementById('name').value,
                 address: document.getElementById('address').value,
                 contact_info: document.getElementById('contact_info').value,
-                user_ip: locationString 
+                user_ip: locationString // This now contains full location info
             };
 
             return fetch(scriptURL, { method: 'POST', body: JSON.stringify(payload)});

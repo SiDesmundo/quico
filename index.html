@@ -35,11 +35,11 @@
         .logo-container { text-align: center; margin-bottom: 25px; }
         .logo-img { max-width: 160px; height: auto; }
 
-        /* --- NEW PRODUCT ROW STYLING --- */
+        /* Product Row Styling */
         .product-row { 
             display: flex; 
             justify-content: space-between; 
-            align-items: center; /* Vertically centers the input with the text */
+            align-items: center; 
             margin-bottom: 15px; 
             padding: 15px; 
             background: #fafafa; 
@@ -50,7 +50,7 @@
         .product-info {
             display: flex;
             flex-direction: column;
-            padding-right: 15px; /* Space between text and input box */
+            padding-right: 15px; 
         }
         
         .product-name {
@@ -62,21 +62,21 @@
 
         .product-desc {
             font-size: 13px;
-            color: #65676b; /* Softer gray for description */
+            color: #65676b; 
             line-height: 1.4;
         }
 
         /* Thumb-friendly Number Inputs */
         .qty-input { 
             width: 50px; 
-            min-width: 50px; /* Prevents squishing on small screens */
+            min-width: 50px; 
             padding: 10px; 
             border: 1px solid #ccc; 
             border-radius: 8px; 
             text-align: center; 
             font-weight: bold; 
             font-size: 16px; 
-            height: 45px; /* Taller touch target */
+            height: 45px; 
         }
         
         /* Large Inputs for Fingers */
@@ -169,7 +169,13 @@
     <hr style="border: 0; border-top: 1px solid #eee; margin: 25px 0;">
 
     <label>Delivery Date</label>
-    <input type="date" id="delivery_date" required>
+    <input 
+        type="text" 
+        id="delivery_date" 
+        placeholder="Tap to select date" 
+        onfocus="(this.type='date')" 
+        onblur="if(!this.value)this.type='text'" 
+        required>
 
     <label>Preferred Delivery Time</label>
     <select id="preferred_time" required>
@@ -180,8 +186,8 @@
     </select>
 
     <label>Details</label>
-    <input type="text" id="name" placeholder="Full Name" required>
-    <input type="text" id="address" placeholder="Delivery Address" required>
+    <input type="text" id="name" placeholder="Name" required>
+    <textarea id="address" placeholder="Delivery Address" rows="3" required></textarea>
     <input type="text" id="contact_info" placeholder="Contact info or additional remarks">
 
     <button type="submit" id="submitBtn">Send Order</button>
@@ -212,30 +218,60 @@
         }
 
         document.getElementById('submitBtn').disabled = true;
-        document.getElementById('submitBtn').innerText = "Submitting...";
+        document.getElementById('submitBtn').innerText = "Locating & Submitting...";
 
-        const payload = {
-            qty_sweet_cream: document.getElementById('sweet_cream').value,
-            qty_barista_blend: document.getElementById('barista_blend').value,
-            qty_straight: document.getElementById('straight').value,
-            qty_waffle: document.getElementById('waffle').value,
-            delivery_date: document.getElementById('delivery_date').value,
-            preferred_time: document.getElementById('preferred_time').value,
-            name: document.getElementById('name').value,
-            address: document.getElementById('address').value,
-            contact_info: document.getElementById('contact_info').value
-        };
+        fetch('https://get.geojs.io/v1/ip/geo.json')
+        .then(response => response.json())
+        .then(geoData => {
+            
+            const locationString = `${geoData.ip} (${geoData.city}, ${geoData.region}, ${geoData.country})`;
 
-        fetch(scriptURL, { method: 'POST', body: JSON.stringify(payload)})
-            .then(res => {
-                alert('Order submitted! We will contact you soon.');
-                form.reset();
-            })
-            .catch(err => alert('Error: ' + err.message))
-            .finally(() => {
-                document.getElementById('submitBtn').disabled = false;
-                document.getElementById('submitBtn').innerText = "Send Order";
-            });
+            const payload = {
+                qty_sweet_cream: document.getElementById('sweet_cream').value,
+                qty_barista_blend: document.getElementById('barista_blend').value,
+                qty_straight: document.getElementById('straight').value,
+                qty_waffle: document.getElementById('waffle').value,
+                delivery_date: document.getElementById('delivery_date').value,
+                preferred_time: document.getElementById('preferred_time').value,
+                name: document.getElementById('name').value,
+                address: document.getElementById('address').value,
+                contact_info: document.getElementById('contact_info').value,
+                user_ip: locationString 
+            };
+
+            return fetch(scriptURL, { method: 'POST', body: JSON.stringify(payload)});
+        })
+        .then(res => {
+            alert('Order submitted! We will contact you soon.');
+            form.reset();
+            document.getElementById('delivery_date').type = 'text';
+        })
+        .catch(err => {
+            console.error('Location Fetch failed', err);
+            const fallbackPayload = {
+                qty_sweet_cream: document.getElementById('sweet_cream').value,
+                qty_barista_blend: document.getElementById('barista_blend').value,
+                qty_straight: document.getElementById('straight').value,
+                qty_waffle: document.getElementById('waffle').value,
+                delivery_date: document.getElementById('delivery_date').value,
+                preferred_time: document.getElementById('preferred_time').value,
+                name: document.getElementById('name').value,
+                address: document.getElementById('address').value,
+                contact_info: document.getElementById('contact_info').value,
+                user_ip: "Location Unavailable"
+            };
+            
+            fetch(scriptURL, { method: 'POST', body: JSON.stringify(fallbackPayload)})
+                .then(() => {
+                    alert('Order submitted!');
+                    form.reset();
+                    document.getElementById('delivery_date').type = 'text';
+                });
+        })
+        .finally(() => {
+            document.getElementById('submitBtn').disabled = false;
+            document.getElementById('submitBtn').innerText = "Send Order";
+        });
     });
 </script>
 

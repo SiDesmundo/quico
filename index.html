@@ -27,7 +27,6 @@
             margin: 0 auto;
         }
 
-        /* Desktop override */
         @media (min-width: 600px) {
             form { max-width: 450px; padding: 30px; }
         }
@@ -36,34 +35,51 @@
         .logo-container { text-align: center; margin-bottom: 25px; }
         .logo-img { max-width: 160px; height: auto; }
 
-        /* Product Rows */
+        /* --- NEW PRODUCT ROW STYLING --- */
         .product-row { 
             display: flex; 
             justify-content: space-between; 
-            align-items: center; 
+            align-items: center; /* Vertically centers the input with the text */
             margin-bottom: 15px; 
-            padding: 15px 10px; 
+            padding: 15px; 
             background: #fafafa; 
             border-radius: 10px; 
             border: 1px solid #eee;
         }
+
+        .product-info {
+            display: flex;
+            flex-direction: column;
+            padding-right: 15px; /* Space between text and input box */
+        }
         
-        .product-row span {
-            font-weight: 600;
+        .product-name {
+            font-weight: 700;
             font-size: 16px;
+            color: #1c1e21;
+            margin-bottom: 4px;
         }
 
-        /* Input Styling */
+        .product-desc {
+            font-size: 13px;
+            color: #65676b; /* Softer gray for description */
+            line-height: 1.4;
+        }
+
+        /* Thumb-friendly Number Inputs */
         .qty-input { 
-            width: 60px; 
+            width: 50px; 
+            min-width: 50px; /* Prevents squishing on small screens */
             padding: 10px; 
             border: 1px solid #ccc; 
             border-radius: 8px; 
             text-align: center; 
             font-weight: bold; 
             font-size: 16px; 
+            height: 45px; /* Taller touch target */
         }
         
+        /* Large Inputs for Fingers */
         input[type="text"], input[type="date"], select, textarea { 
             width: 100%; 
             padding: 14px; 
@@ -118,10 +134,37 @@
         <img src="logo.png" alt="QUI CO Logo" class="logo-img">
     </div>
 
-    <div class="product-row"><span>Sweet Cream</span><input type="number" id="sweet_cream" class="qty-input" value="0" min="0"></div>
-    <div class="product-row"><span>Barista Blend</span><input type="number" id="barista_blend" class="qty-input" value="0" min="0"></div>
-    <div class="product-row"><span>Straight</span><input type="number" id="straight" class="qty-input" value="0" min="0"></div>
-    <div class="product-row"><span>Waffle</span><input type="number" id="waffle" class="qty-input" value="0" min="0"></div>
+    <div class="product-row">
+        <div class="product-info">
+            <span class="product-name">Straight</span>
+            <span class="product-desc">Slow, cold-steeped overnight and bottled fresh. Smooth, bold, and ready to drink.</span>
+        </div>
+        <input type="number" id="straight" class="qty-input" value="0" min="0">
+    </div>
+
+    <div class="product-row">
+        <div class="product-info">
+            <span class="product-name">Sweet Cream</span>
+            <span class="product-desc">Our straight cold brew blended with home-made sweet cream. Rich, velvety, and sweet.</span>
+        </div>
+        <input type="number" id="sweet_cream" class="qty-input" value="0" min="0">
+    </div>
+
+    <div class="product-row">
+        <div class="product-info">
+            <span class="product-name">Barista Blend</span>
+            <span class="product-desc">Our signature mix. A harmony of our bold cold brew and our home-made cream blend.</span>
+        </div>
+        <input type="number" id="barista_blend" class="qty-input" value="0" min="0">
+    </div>
+
+    <div class="product-row">
+        <div class="product-info">
+            <span class="product-name">Waffle</span>
+            <span class="product-desc">Crisp on the outside, fluffy on the inside. Smothered in chocolate sauce and sweet toppings.</span>
+        </div>
+        <input type="number" id="waffle" class="qty-input" value="0" min="0">
+    </div>
 
     <hr style="border: 0; border-top: 1px solid #eee; margin: 25px 0;">
 
@@ -138,8 +181,8 @@
 
     <label>Details</label>
     <input type="text" id="name" placeholder="Full Name" required>
-    <textarea id="address" placeholder="Delivery Address" rows="3" required></textarea>
-    <input type="text" id="contact_info" placeholder="FB Name or Phone (Optional)">
+    <input type="text" id="address" placeholder="Delivery Address" required>
+    <input type="text" id="contact_info" placeholder="Contact info or additional remarks">
 
     <button type="submit" id="submitBtn">Send Order</button>
 </form>

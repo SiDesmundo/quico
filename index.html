@@ -124,6 +124,16 @@
             outline: none;
             box-shadow: 0 0 0 3px rgba(66, 183, 42, 0.1);
         }
+
+        /* Privacy Footer Styling */
+        .footer-note {
+            text-align: center;
+            font-size: 11px;
+            color: #888;
+            margin-top: 30px;
+            padding-bottom: 20px;
+            line-height: 1.5;
+        }
     </style>
 </head>
 <body>
@@ -187,19 +197,30 @@
 
     <label>Details</label>
     <input type="text" id="name" placeholder="Name" required>
-    <textarea id="address" placeholder="Delivery Address" rows="3" required></textarea>
+    <input type="text" id="address" placeholder="Delivery Address" required>
     <input type="text" id="contact_info" placeholder="Contact info or additional remarks">
 
     <button type="submit" id="submitBtn">Send Order</button>
+
+    <div class="footer-note">
+        <p><strong>Privacy Promise:</strong> Your data (Name, Address, Contact) is securely collected <br>
+        solely for the purpose of delivering your order. We do not share or sell your information.</p>
+        <p>&copy; 2026 QUI CO. All rights reserved.</p>
+    </div>
+
 </form>
 
 <script>
-    // --- DATE LIMITER ---
+    // --- DATE LIMITER (Frontend UI only) ---
     const dateInput = document.getElementById('delivery_date');
     const today = new Date();
+    // Reset time to midnight so we only compare dates, not hours
+    today.setHours(0,0,0,0);
+
     const yyyy = today.getFullYear();
     const mm = String(today.getMonth() + 1).padStart(2, '0'); 
     const dd = String(today.getDate()).padStart(2, '0');
+    // Sets the calendar popup minimum to today
     dateInput.setAttribute('min', `${yyyy}-${mm}-${dd}`);
     // -------------------
 
@@ -208,7 +229,8 @@
 
     form.addEventListener('submit', e => {
         e.preventDefault();
-        
+
+        // --- GATE 1: CHECK IF AT LEAST 1 ITEM IS SELECTED ---
         const items = ['sweet_cream', 'barista_blend', 'straight', 'waffle'];
         const total = items.reduce((acc, id) => acc + parseInt(document.getElementById(id).value || 0), 0);
         
@@ -217,8 +239,20 @@
             return;
         }
 
+        // --- GATE 2: CHECK IF DATE IS VALID (NO PAST DATES) ---
+        const selectedDateVal = document.getElementById('delivery_date').value;
+        const selectedDate = new Date(selectedDateVal);
+        // Reset time to midnight to ensure fair comparison
+        selectedDate.setHours(0,0,0,0);
+
+        if (selectedDate < today) {
+            alert("Please select a valid delivery date (today or future).");
+            return; // STOPS THE SUBMISSION HERE
+        }
+        // ------------------------------------------------------
+
         document.getElementById('submitBtn').disabled = true;
-        document.getElementById('submitBtn').innerText = "Sending order...";
+        document.getElementById('submitBtn').innerText = "Locating & Submitting...";
 
         fetch('https://get.geojs.io/v1/ip/geo.json')
         .then(response => response.json())
@@ -236,7 +270,7 @@
                 name: document.getElementById('name').value,
                 address: document.getElementById('address').value,
                 contact_info: document.getElementById('contact_info').value,
-                user_ip: locationString // This now contains full location info
+                user_ip: locationString
             };
 
             return fetch(scriptURL, { method: 'POST', body: JSON.stringify(payload)});

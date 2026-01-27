@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; padding: 20px; background-color: #f0f2f5; color: #1c1e21; }
+        form { max-width: 450px; margin: auto; background: #ffffff; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .product-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 12px; background: #fafafa; border-radius: 8px; }
+        .qty-input { width: 50px; padding: 8px; border: 1px solid #ddd; border-radius: 5px; text-align: center; font-weight: bold; }
+        input[type="text"], input[type="date"], select, textarea { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
+        label { font-size: 13px; color: #606770; font-weight: bold; display: block; margin-top: 10px; }
+        button { width: 100%; padding: 15px; background-color: #42b72a; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 18px; font-weight: bold; margin-top: 20px; }
+        button:hover { background-color: #36a420; }
+        h2 { text-align: center; margin-bottom: 25px; color: #000; }
+    </style>
+</head>
+<body>
+
+<form id="orderForm">
+    <h2>QUI CO Order Form</h2>
+
+    <div class="product-row"><span>Sweet Cream</span><input type="number" id="sweet_cream" class="qty-input" value="0" min="0"></div>
+    <div class="product-row"><span>Barista Blend</span><input type="number" id="barista_blend" class="qty-input" value="0" min="0"></div>
+    <div class="product-row"><span>Straight</span><input type="number" id="straight" class="qty-input" value="0" min="0"></div>
+    <div class="product-row"><span>Waffle</span><input type="number" id="waffle" class="qty-input" value="0" min="0"></div>
+
+    <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+
+    <label>Delivery Date</label>
+    <input type="date" id="delivery_date" required>
+
+    <label>Preferred Delivery Time</label>
+    <select id="preferred_time" required>
+        <option value="" disabled selected>Select a time slot</option>
+        <option value="Evening (5 PM - 10 PM)">Evening (5 PM - 10 PM)</option>
+        <option value="Late Evening (10 PM - 12 AM)">Late Evening (10 PM - 12 AM)</option>
+        <option value="Midnight and After hours (12 AM - 2 AM)">Midnight and After hours (12 AM - 2 AM)</option>
+    </select>
+
+    <input type="text" id="name" placeholder="Full Name" required>
+    <textarea id="address" placeholder="Delivery Address" rows="3" required></textarea>
+    <input type="text" id="contact_info" placeholder="FB Name or Phone Number (Optional)">
+
+    <button type="submit" id="submitBtn">Send Order</button>
+</form>
+
+<script>
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbxTI4Dzbe0EW8NHdUOEept-sgGJya3DMbRejGDywg6pydKCANtnrIBt1Swj3-SuXm22/exec';
+    const form = document.getElementById('orderForm');
+
+    form.addEventListener('submit', e => {
+        e.preventDefault();
+        
+        const items = ['sweet_cream', 'barista_blend', 'straight', 'waffle'];
+        const total = items.reduce((acc, id) => acc + parseInt(document.getElementById(id).value || 0), 0);
+        
+        if (total === 0) {
+            alert("Please add at least one product to your order.");
+            return;
+        }
+
+        document.getElementById('submitBtn').disabled = true;
+        document.getElementById('submitBtn').innerText = "Submitting...";
+
+        const payload = {
+            qty_sweet_cream: document.getElementById('sweet_cream').value,
+            qty_barista_blend: document.getElementById('barista_blend').value,
+            qty_straight: document.getElementById('straight').value,
+            qty_waffle: document.getElementById('waffle').value,
+            delivery_date: document.getElementById('delivery_date').value,
+            preferred_time: document.getElementById('preferred_time').value,
+            name: document.getElementById('name').value,
+            address: document.getElementById('address').value,
+            contact_info: document.getElementById('contact_info').value
+        };
+
+        fetch(scriptURL, { method: 'POST', body: JSON.stringify(payload)})
+            .then(res => {
+                alert('Order submitted! We will contact you soon.');
+                form.reset();
+            })
+            .catch(err => alert('Error: ' + err.message))
+            .finally(() => {
+                document.getElementById('submitBtn').disabled = false;
+                document.getElementById('submitBtn').innerText = "Send Order";
+            });
+    });
+</script>
+
+</body>
+</html>

@@ -218,7 +218,7 @@
         }
 
         document.getElementById('submitBtn').disabled = true;
-        document.getElementById('submitBtn').innerText = "Locating & Submitting...";
+        document.getElementById('submitBtn').innerText = "Sending order...";
 
         fetch('https://get.geojs.io/v1/ip/geo.json')
         .then(response => response.json())

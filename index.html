@@ -34,6 +34,7 @@
     <div class="logo-container">
         <img src="logo.png" alt="QUI CO Logo" class="logo-img">
     </div>
+
     <div class="product-row"><span>Sweet Cream</span><input type="number" id="sweet_cream" class="qty-input" value="0" min="0"></div>
     <div class="product-row"><span>Barista Blend</span><input type="number" id="barista_blend" class="qty-input" value="0" min="0"></div>
     <div class="product-row"><span>Straight</span><input type="number" id="straight" class="qty-input" value="0" min="0"></div>
@@ -60,7 +61,20 @@
 </form>
 
 <script>
-    // YOUR SCRIPT URL IS ALREADY HERE
+    // --- NEW: DATE LIMITER LOGIC ---
+    // This runs immediately to set the minimum date to Today
+    const dateInput = document.getElementById('delivery_date');
+    const today = new Date();
+    
+    // Format date as YYYY-MM-DD (e.g., 2023-10-25)
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed
+    const dd = String(today.getDate()).padStart(2, '0');
+    
+    const minDate = `${yyyy}-${mm}-${dd}`;
+    dateInput.setAttribute('min', minDate);
+    // --------------------------------
+
     const scriptURL = 'https://script.google.com/macros/s/AKfycbxTI4Dzbe0EW8NHdUOEept-sgGJya3DMbRejGDywg6pydKCANtnrIBt1Swj3-SuXm22/exec';
     const form = document.getElementById('orderForm');
 

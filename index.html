@@ -17,7 +17,7 @@
             padding: 15px; 
         }
         
-        /* Mobile-First Container */
+        /* Container */
         form { 
             background: #ffffff; 
             padding: 20px; 
@@ -38,19 +38,43 @@
         /* Product Row Styling */
         .product-row { 
             display: flex; 
-            justify-content: space-between; 
+            gap: 12px;
             align-items: center; 
             margin-bottom: 15px; 
-            padding: 15px; 
+            padding: 12px; 
             background: #fafafa; 
             border-radius: 10px; 
             border: 1px solid #eee;
         }
 
+        /* Image Styling & Zoom Logic */
+        .img-wrapper { position: relative; cursor: pointer; flex-shrink: 0; }
+        
+        .item-img {
+            width: 75px; 
+            height: 75px; 
+            object-fit: cover; 
+            border-radius: 8px;
+            background-color: #ddd; 
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: block;
+        }
+
+        /* PC Web Hover Zoom */
+        @media (min-width: 1024px) {
+            .item-img:hover { 
+                transform: scale(2.8); 
+                z-index: 99; 
+                box-shadow: 0 10px 20px rgba(0,0,0,0.3); 
+                position: relative;
+            }
+        }
+
+        /* Product Info Text */
         .product-info {
             display: flex;
             flex-direction: column;
-            padding-right: 15px; 
+            flex: 1; 
         }
         
         .product-name {
@@ -66,7 +90,7 @@
             line-height: 1.4;
         }
 
-        /* Thumb-friendly Number Inputs */
+        /* Quantity Input */
         .qty-input { 
             width: 50px; 
             min-width: 50px; 
@@ -79,7 +103,7 @@
             height: 45px; 
         }
         
-        /* Large Inputs for Fingers */
+        /* Standard Inputs */
         input[type="text"], input[type="date"], select, textarea { 
             width: 100%; 
             padding: 14px; 
@@ -100,7 +124,7 @@
             display: block; 
         }
 
-        /* Button */
+        /* Submit Button */
         button { 
             width: 100%; 
             padding: 18px; 
@@ -119,13 +143,21 @@
         button:active { background-color: #36a420; transform: scale(0.98); }
         button:disabled { background-color: #ccc; box-shadow: none; transform: none; }
 
-        input:focus, select:focus, textarea:focus {
-            border-color: #42b72a;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(66, 183, 42, 0.1);
+        /* Mobile Modal for Clicking Images */
+        .modal { 
+            display: none; 
+            position: fixed; 
+            z-index: 1000; 
+            left: 0; top: 0; 
+            width: 100%; height: 100%; 
+            background-color: rgba(0,0,0,0.9); 
+            align-items: center; 
+            justify-content: center; 
         }
+        .modal-content { max-width: 90%; max-height: 80%; border-radius: 12px; }
+        .close-modal { position: absolute; top: 20px; right: 30px; color: white; font-size: 40px; font-weight: bold; cursor: pointer; }
 
-        /* Privacy Footer Styling */
+        /* Footer */
         .footer-note {
             text-align: center;
             font-size: 11px;
@@ -138,6 +170,11 @@
 </head>
 <body>
 
+<div id="imageModal" class="modal" onclick="this.style.display='none'">
+    <span class="close-modal">&times;</span>
+    <img class="modal-content" id="modalImg">
+</div>
+
 <form id="orderForm">
     
     <div class="logo-container">
@@ -145,6 +182,9 @@
     </div>
 
     <div class="product-row">
+        <div class="img-wrapper">
+            <img src="straight.jpg" alt="Straight" class="item-img" onclick="zoomImg(this)">
+        </div>
         <div class="product-info">
             <span class="product-name">Straight</span>
             <span class="product-desc">Slow, cold-steeped overnight and bottled fresh. Smooth, bold, and ready to drink.</span>
@@ -153,6 +193,9 @@
     </div>
 
     <div class="product-row">
+        <div class="img-wrapper">
+            <img src="sweet-cream.jpg" alt="Sweet Cream" class="item-img" onclick="zoomImg(this)">
+        </div>
         <div class="product-info">
             <span class="product-name">Sweet Cream</span>
             <span class="product-desc">Our straight cold brew blended with home-made sweet cream. Rich, velvety, and sweet.</span>
@@ -161,6 +204,9 @@
     </div>
 
     <div class="product-row">
+        <div class="img-wrapper">
+            <img src="barista-blend.jpg" alt="Barista Blend" class="item-img" onclick="zoomImg(this)">
+        </div>
         <div class="product-info">
             <span class="product-name">Barista Blend</span>
             <span class="product-desc">Our signature mix. A harmony of our bold cold brew and our home-made cream blend.</span>
@@ -169,6 +215,9 @@
     </div>
 
     <div class="product-row">
+        <div class="img-wrapper">
+            <img src="waffle.jpg" alt="Waffle" class="item-img" onclick="zoomImg(this)">
+        </div>
         <div class="product-info">
             <span class="product-name">Waffle</span>
             <span class="product-desc">Crisp on the outside, fluffy on the inside. Smothered in chocolate sauce and sweet toppings.</span>
@@ -203,17 +252,29 @@
     <button type="submit" id="submitBtn">Send Order</button>
 
     <div class="footer-note">
-        <p><strong>Privacy Promise:</strong> Your data (Name, Address, Contact) is securely collected solely for the purpose of delivering your order. We do not share or sell your information.</p>
-        <p>&copy; 2026 QUI CO. All rights reserved.</p>
+        <p><strong>Privacy Promise:</strong> Your data (Name, Address, Contact) is securely collected <br>
+        solely for the purpose of delivering your order. We do not share or sell your information.</p>
+        <p>&copy; <span id="year"></span> QUI CO. All rights reserved.</p>
     </div>
 
 </form>
-
+f
 <script>
+    // --- SET YEAR ---
+    document.getElementById("year").innerHTML = new Date().getFullYear();
+
+    // --- MOBILE ZOOM SCRIPT ---
+    function zoomImg(img) {
+        if (window.innerWidth < 1024) { // Only trigger on smaller screens
+            document.getElementById('imageModal').style.display = 'flex';
+            document.getElementById('modalImg').src = img.src;
+        }
+    }
+
+    // --- DATE LIMITER ---
     const dateInput = document.getElementById('delivery_date');
     const today = new Date();
     today.setHours(0,0,0,0);
-
     const yyyy = today.getFullYear();
     const mm = String(today.getMonth() + 1).padStart(2, '0'); 
     const dd = String(today.getDate()).padStart(2, '0');
@@ -225,6 +286,7 @@
     form.addEventListener('submit', e => {
         e.preventDefault();
 
+        // VALIDATION: AT LEAST 1 ITEM
         const items = ['sweet_cream', 'barista_blend', 'straight', 'waffle'];
         const total = items.reduce((acc, id) => acc + parseInt(document.getElementById(id).value || 0), 0);
         
@@ -233,6 +295,7 @@
             return;
         }
 
+        // VALIDATION: NO PAST DATES
         const selectedDateVal = document.getElementById('delivery_date').value;
         const selectedDate = new Date(selectedDateVal);
         selectedDate.setHours(0,0,0,0);
@@ -272,7 +335,8 @@
             document.getElementById('delivery_date').type = 'text';
         })
         .catch(err => {
-            console.error('Location Fetch failed', err);
+            console.error('Submission failed', err);
+            // Fallback submission if geo-fetch fails
             const fallbackPayload = {
                 qty_sweet_cream: document.getElementById('sweet_cream').value,
                 qty_barista_blend: document.getElementById('barista_blend').value,
@@ -285,13 +349,8 @@
                 contact_info: document.getElementById('contact_info').value,
                 user_ip: "Location Unavailable"
             };
-            
             fetch(scriptURL, { method: 'POST', body: JSON.stringify(fallbackPayload)})
-                .then(() => {
-                    alert('Order submitted!');
-                    form.reset();
-                    document.getElementById('delivery_date').type = 'text';
-                });
+                .then(() => { alert('Order submitted!'); form.reset(); });
         })
         .finally(() => {
             document.getElementById('submitBtn').disabled = false;
